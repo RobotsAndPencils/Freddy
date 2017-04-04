@@ -57,7 +57,66 @@ extension JSONSerialization: JSONParserType {
     public static func makeJSON(with object: Any) -> JSON {
         switch object {
         case let n as NSNumber:
+#if os(Linux)
+            enum CFCompatNumberType {
+                /* Fixed-width types */
+                case sInt8Type
+                case sInt16Type
+                case sInt32Type
+                case sInt64Type
+                case float32Type
+                case float64Type /* 64-bit IEEE 754 */
+                /* Basic C types */
+                case charType
+                case shortType
+                case intType
+                case longType
+                case longLongType
+                case floatType
+                case doubleType
+                /* Other */
+                case cfIndexType
+                case nsIntegerType
+                case cgFloatType
+
+                //from https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html
+                static func getType(_ number: NSNumber) -> CFCompatNumberType {
+                    let objCtype = String(cString: number.objCType)
+                    switch objCtype {
+                    case "c":
+                        return .charType
+                    case "C":
+                        return .charType
+                    case "s":
+                        return .shortType
+                    case "S":
+                        return .shortType
+                    case "i":
+                        return .intType
+                    case "I":
+                        return .intType
+                    case "l":
+                        return .longType
+                    case "L":
+                        return .intType
+                    case "q":
+                        return .longLongType
+                    case "Q":
+                        return .longLongType
+                    case "f":
+                        return .floatType
+                    case "d":
+                        return .doubleType
+                    default:
+                        return .floatType
+                    }
+                }
+            }
+
+            let numberType = CFCompatNumberType.getType(n)
+#else
             let numberType = CFNumberGetType(n)
+#endif
             switch numberType {
             case .charType:
                 return .bool(n.boolValue)
