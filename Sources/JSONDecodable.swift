@@ -6,6 +6,8 @@
 //  Copyright © 2015 Big Nerd Ranch. Licensed under MIT.
 //
 
+import Foundation
+
 /// A protocol to provide functionality for creating a model object with a `JSON`
 /// value.
 public protocol JSONDecodable {

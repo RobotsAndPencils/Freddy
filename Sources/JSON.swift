@@ -6,6 +6,8 @@
 //  Copyright © 2015 Big Nerd Ranch. Licensed under MIT.
 //
 
+import Foundation
+
 /// An enum to describe the structure of JSON.
 public enum JSON {
     /// A case for denoting an array with an associated value of `[JSON]`

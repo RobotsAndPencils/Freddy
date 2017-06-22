@@ -6,6 +6,8 @@
 //  Copyright © 2015 Big Nerd Ranch. All rights reserved.
 //
 
+import Foundation
+
 // MARK: JSONPathType
 
 /// A protocol used to define a path within an instance of `JSON` that leads to some desired value.

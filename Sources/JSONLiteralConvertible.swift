@@ -6,6 +6,8 @@
 //  Copyright © 2015 Big Nerd Ranch. Licensed under MIT.
 //
 
+import Foundation
+
 // MARK: - ArrayLiteralConvertible
 
 extension JSON: ExpressibleByArrayLiteral {
