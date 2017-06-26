@@ -55,14 +55,43 @@ extension JSON {
 // MARK: - Test Equality
 
 public extension Decimal {
+    /// Taken verbatim from https://github.com/apple/swift-corelibs-foundation/blob/master/Foundation/NSDecimal.swift @ 46b4e84a263d4fb657d84dfa4ca5b8fb4ed1f75f
+    /// Why? Decimal.doubleValue is internal. You can bridge to NSDecimalNumber and use its doubleValue property. What’s the implementation of NSDecimalNumber.doubleValue? `return decimal.doubleValue`. And NSDecimalNumber (or maybe just bridging to it) caused compiler crashes in release builds with (and sometimes without) whole-module optimization turned on.
+    /// So, the real work is done in Decimal.doubleValue. If only we could do that work entirely with Decimal to get around the bridging crash...
+    /// It turns out that the implementation of Decimal.doubleValue depends on public properties. It doesn't _look_ like it does, because they're all prefixed with an underscore, but the really-really-I-promise private properties have two underscores. Whatever, I'll take it.
+    ///
+    /// Related bug: "Decimal.doubleValue should be public" https://bugs.swift.org/browse/SR-4396
     var doubleValue: Double {
-        return NSDecimalNumber(decimal:self).doubleValue
+        var d = 0.0
+        if _length == 0 && _isNegative == 1 {
+            return Double.nan
+        }
+
+        d = d * 65536 + Double(_mantissa.7)
+        d = d * 65536 + Double(_mantissa.6)
+        d = d * 65536 + Double(_mantissa.5)
+        d = d * 65536 + Double(_mantissa.4)
+        d = d * 65536 + Double(_mantissa.3)
+        d = d * 65536 + Double(_mantissa.2)
+        d = d * 65536 + Double(_mantissa.1)
+        d = d * 65536 + Double(_mantissa.0)
+
+        if _exponent < 0 {
+            for _ in _exponent..<0 {
+                d /= 10.0
+            }
+        } else {
+            for _ in 0..<_exponent {
+                d *= 10.0
+            }
+        }
+        return _isNegative != 0 ? -d : d
     }
     var intValue: Int {
-        return NSDecimalNumber(decimal:self).intValue
+        return Int(doubleValue)
     }
     var stringValue: String {
-        return NSDecimalNumber(decimal:self).stringValue
+        return String(describing: doubleValue)
     }
 }
 
@@ -114,7 +143,7 @@ extension JSON: CustomStringConvertible {
         case .array(let arr):       return String(describing: arr)
         case .dictionary(let dict): return String(describing: dict)
         case .string(let string):   return string
-            case .decimal(let decimal): return String(describing: decimal)
+        case .decimal(let decimal): return String(describing: decimal)
         case .double(let double):   return String(describing: double)
         case .int(let int):         return String(describing: int)
         case .bool(let bool):       return String(describing: bool)
