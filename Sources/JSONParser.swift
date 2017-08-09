@@ -456,11 +456,11 @@ public struct JSONParser {
 
             case .preDecimalDigits:
                 try parser.parsePreDecimalDigits { c in
-                    guard case let (exponent, ArithmeticOverflow.none) = value.multipliedReportingOverflow(by: 10) else {
+                    guard case let (exponent, false) = value.multipliedReportingOverflow(by: 10) else {
 //                    guard case let (exponent, false) = Int.multiplyWithOverflow(10, value) else {
                         throw InternalError.numberOverflow(offset: parser.start)
                     }
-                    guard case let (newValue, ArithmeticOverflow.none) = value.addingReportingOverflow(Int(c - Literal.zero)) else {
+                    guard case let (newValue, false) = value.addingReportingOverflow(Int(c - Literal.zero)) else {
 //                    guard case let (newValue, false) = Int.addWithOverflow(exponent, Int(c - Literal.zero)) else {
                         throw InternalError.numberOverflow(offset: parser.start)
                     }
@@ -481,7 +481,7 @@ public struct JSONParser {
             }
         }
 
-        guard case let (signedValue, ArithmeticOverflow.none) = value.multipliedReportingOverflow(by: sign.rawValue) else {
+        guard case let (signedValue, false) = value.multipliedReportingOverflow(by: sign.rawValue) else {
 //        guard case let (signedValue, false) = Int.multiplyWithOverflow(sign.rawValue, value) else {
             throw InternalError.numberOverflow(offset: parser.start)
         }
